@@ -1,102 +1,83 @@
-# Horse Race Prediction Model
+# At Yarışı Sıralama Tahmini / Horse Race Ranking Prediction
 
-Bu proje, at yarışı sonuçlarını tahmin etmek için geliştirilmiş bir makine öğrenimi modelini ve ilgili kodları içerir. TJK (Türkiye Jokey Kulübü) verilerini kullanarak LSTM tabanlı tahminleme yapar.
+## Proje Hakkında / About the Project
 
-## Özellikler
+Bu proje, at yarışı verilerini kullanarak her yarışta atların sıralamasını tahmin etmeyi amaçlamaktadır.  
+Veri setindeki antrenman (idman) süreleri, at-jokey ve pist uyumu gibi özellikler çıkarılarak LightGBM regresyon modeli ile sıralama tahmini yapılmıştır.
 
-* At yarışı verilerinin analizi ve temizlenmesi
-* Gelişmiş özellik mühendisliği
-* LSTM tabanlı makine öğrenimi modeli
-* Veri ön işleme ve görselleştirme
-* Model performans değerlendirmesi
+This project aims to predict the ranking of horses in each race using horse racing datasets.  
+Features like training times, horse-jockey compatibility, and track suitability were engineered, and a LightGBM regression model was trained to predict horse rankings.
 
-## Proje Yapısı
+---
 
-```
-├── csv-to-df(1).ipynb          # CSV verilerini DataFrame'e dönüştürme
-├── date(2).ipynb               # Tarih verilerinin işlenmesi
-├── vis&numeric(3).ipynb        # Veri görselleştirme ve sayısal analiz
-├── idman-prep(4).ipynb         # İdman verilerinin hazırlanması
-├── modelling(5).ipynb          # Model eğitimi ve değerlendirme
-├── anne_tablosu.csv            # Anne at verileri
-├── antrenor_tablosu.csv        # Antrenör verileri
-├── at_id_tablosu.csv           # At kimlik verileri
-├── baba_tablosu.csv            # Baba at verileri
-├── jokey_tablosu.csv           # Jokey verileri
-├── sahip_tablosu.csv           # Sahip verileri
-├── yarışlar_temiz.csv          # Temizlenmiş yarış verileri
-├── lightgbm_model.pkl          # Eğitilmiş model dosyası
-└── README.md                   # Bu dosya
-```
+## Veri Hazırlığı / Data Preparation
 
-## Kurulum
+- Atların yarış öncesi antrenman süreleri (örneğin 400m, 600m süreleri) saniyeye çevrildi.  
+- Antrenmanlardan elde edilen ortalama değerler yarış bazında eklendi.  
+- At-jokey, at-pist uyumu ve mesafe tercihi gibi yeni özellikler oluşturuldu.  
+- Tarih bilgisi eksik olan satırlar temizlendi ve yarışlar tarih bazında sıralandı.  
+- Veri seti yarış bazında %80 eğitim, %20 test olarak bölündü ve yarışlar karıştırıldı.
 
-1. Bu repoyu klonlayın:
-```bash
-git clone https://github.com/yahakn/HorseRacePredictionModel.git
-cd HorseRacePredictionModel
-```
+- Training times before races (e.g., 400m, 600m times) were converted to seconds.  
+- Average values from recent trainings were added per race.  
+- Features such as horse-jockey compatibility, horse-track compatibility, and distance preference were created.  
+- Rows with missing date information were dropped and races sorted by date.  
+- Dataset was split into 80% train and 20% test by race, shuffling races to prevent data leakage.
 
-2. Gerekli Python paketlerini yükleyin:
-```bash
-pip install pandas numpy matplotlib seaborn scikit-learn tensorflow lightgbm jupyter
-```
+---
 
-## Kullanım
+## Modelleme / Modeling
 
-1. Jupyter Notebook'ları sırasıyla çalıştırın:
-   - `csv-to-df(1).ipynb`: Veri yükleme ve temel işlemler
-   - `date(2).ipynb`: Tarih verilerinin düzenlenmesi
-   - `vis&numeric(3).ipynb`: Veri analizi ve görselleştirme
-   - `idman-prep(4).ipynb`: İdman verilerinin hazırlanması
-   - `modelling(5).ipynb`: Model eğitimi ve tahminleme
+- LightGBM regresyon modeli kullanıldı.  
+- Hedef değişken olarak atların gerçek sıralaması (At No) kullanıldı.  
+- Derece_saniye (yarış derecesi) özelliği modelden çıkarıldı, çünkü modelin sıralamayı ezberlemesini engellemek amaçlandı.  
+- Modelin performansı RMSE ile ölçüldü ve tahmin sonuçları yarış bazında değerlendirildi.
 
-2. Model eğitimi tamamlandıktan sonra `lightgbm_model.pkl` dosyası oluşacaktır.
+- A LightGBM regression model was used.  
+- Target variable was the true horse ranking (At No).  
+- The feature `Derece_saniye` (race time) was removed to prevent the model from memorizing rankings.  
+- Model performance was evaluated with RMSE, and predictions were analyzed per race.
 
-## Veri Kaynakları
+---
 
-Proje aşağıdaki veri kaynaklarını kullanır:
-- TJK (Türkiye Jokey Kulübü) yarış sonuçları
-- At kimlik bilgileri (anne, baba, sahip)
-- Antrenör ve jokey istatistikleri
-- İdman performans verileri
+## Değerlendirme / Evaluation
 
-## Model Özellikleri
+- Model yarışlardaki at sıralamasını tahmin etti.  
+- İlk iki atın sırasız doğru tahmin edilme oranı yaklaşık %66 olarak bulundu.  
+- Özellik önemleri incelendiğinde derece_saniye hariç antrenman süreleri ve uyum skorları önemli bulundu.  
 
-- **Algoritma**: LightGBM (Gradient Boosting)
-- **Özellikler**: At performans geçmişi, antrenör/jokey istatistikleri, idman verileri
-- **Hedef**: Yarış sonuçlarının tahmin edilmesi
-- **Performans**: Model doğruluğu ve metrikleri notebook'larda detaylandırılmıştır
+- The model predicted horse rankings within races.  
+- The unordered accuracy for the top two horses was approximately 66%.  
+- Feature importance showed training times and compatibility scores were influential, excluding race times.
 
-## Gereksinimler
+---
 
-* Python 3.8+
-* pandas
-* numpy
-* matplotlib
-* seaborn
-* scikit-learn
-* tensorflow
-* lightgbm
-* jupyter
+## Kullanım / Usage
 
-## Katkı
+- Veri dosyasını `df` olarak yükleyin.  
+- Veri hazırlık ve feature engineering kodlarını çalıştırın.  
+- Modeli eğitmek için ilgili kod bloğunu çalıştırın.  
+- Modeli kaydedebilir ve yeni verilerle tahmin yapabilirsiniz.
 
-Katkıda bulunmak isterseniz:
-1. Bu repoyu fork edin
-2. Yeni bir branch oluşturun (`git checkout -b feature/yeni-ozellik`)
-3. Değişikliklerinizi commit edin (`git commit -am 'Yeni özellik eklendi'`)
-4. Branch'inizi push edin (`git push origin feature/yeni-ozellik`)
-5. Pull Request oluşturun
+- Load the dataset as `df`.  
+- Run data preparation and feature engineering scripts.  
+- Train the model with the training script.  
+- Save the model and make predictions on new data.
 
-## Lisans
+---
 
-Bu proje MIT lisansı ile lisanslanmıştır.
+## Gereksinimler / Requirements
 
-## İletişim
+- Python 3.x  
+- pandas  
+- numpy  
+- scikit-learn  
+- lightgbm  
+- joblib (model kaydetmek için)
 
-Sorularınız için GitHub Issues kullanabilirsiniz.
+---
 
-## Not
+## İletişim / Contact
 
-Bu proje geliştirme aşamasındadır ve sürekli iyileştirilmektedir. Model performansı ve doğruluğu garanti edilmez. 
+Her türlü soru ve öneri için iletişime geçebilirsiniz.
+# HorseRacePredictionMlModel
