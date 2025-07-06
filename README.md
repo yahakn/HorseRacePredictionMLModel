@@ -79,5 +79,5 @@ Features like training times, horse-jockey compatibility, and track suitability 
 
 ## İletişim / Contact
 
-Her türlü soru ve öneri için iletişime geçebilirsiniz.
+Her türlü soru ve öneri için iletişime geçebilirsiniz. ynushakan@gmail.com
 # HorseRacePredictionMlModel
